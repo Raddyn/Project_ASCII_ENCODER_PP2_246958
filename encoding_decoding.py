@@ -11,7 +11,7 @@ def popup_message(error='') -> None:
                       'Tomčala (246958) for PP2 class.\nIn Brno VUT FEKT 2023')
         messagebox.showinfo(title="About", message=about_text)
     else:
-        messagebox.showinfo(title="About", message=error)
+        messagebox.showinfo(title="Error", message=error)
 
 
 class ASCIIapp:
@@ -115,19 +115,19 @@ class ASCIIapp:
             self.Show(temp)
         else:
             return temp
-        '''
-         TODO: Zjisti proč to hází ten random poslední charakter :D = Hotovo,  je tam chyba u větších hodnot KURVA 
-          -> VYŘEŠENO
-        '''
 
     def Show(self, input_string) -> None:
         """
         Shows inputed string in the scrolledtext textbox wiidget
         """
-        while input_string[-1] == '\n':  # Removes the last entry character,
-            input_string.pop()  # without it the textbox always adds it for some reason
-        content = ''.join(input_string)
-        self.textbox.insert("1.0", content)
+        try:
+            while input_string[-1] == '\n':  # Removes the last entry character,
+                input_string.pop()  # without it the textbox always adds it for some reason
+            content = ''.join(input_string)
+            self.textbox.insert("1.0", content)
+        except Exception as error:
+            # popup_message('No input!')
+            popup_message(str(error)+'\nNo input!')
 
     def Clear(self) -> None:
         """
