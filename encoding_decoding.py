@@ -168,7 +168,7 @@ class ASCIIapp:
             self.key = key
             for i in cipher:
                 for o in self.muew:
-                    if i == o:
+                    if i.lower() == o.lower():
                         key_guess[key] += 1
 
         print(max(key_guess))
