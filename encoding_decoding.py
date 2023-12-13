@@ -2,7 +2,8 @@ import os
 import tkinter as tk
 from tkinter import scrolledtext
 from tkinter import filedialog
-from typing import List
+from tkinter import messagebox
+
 
 
 class ASCIIapp:
@@ -28,7 +29,7 @@ class ASCIIapp:
         self.enc_butt = tk.Radiobutton(self.butt_frame, text='encrypt', variable=self.mode, value=1)
         self.dec_butt = tk.Radiobutton(self.butt_frame, text='decrypt', variable=self.mode, value=2)
         self.brute_butt = tk.Radiobutton(self.butt_frame, text='bruteforce', variable=self.mode, value=3)
-        self.key_scale = tk.Scale(self.key_frame, variable=self.keyval_scale, orient='horizontal', from_=0, to=94,
+        self.key_scale = tk.Scale(self.key_frame, variable=self.keyval_scale, orient='horizontal', from_=0, to=94, 
                                   showvalue=0, command=self.Key_scale_update)
         self.key_entry = tk.Entry(self.key_frame, textvariable=self.key, width=30)
         self.Convert_button = tk.Button(window, text='CONVERT', width=10, command=self.modetest)
@@ -57,7 +58,7 @@ class ASCIIapp:
         self.file_menu.add_command(label='Quit', command=self.Close_app)
         #
         self.Menu_bar.add_cascade(label='About', menu=self.about_menu)
-        self.about_menu.add_command(label='About')
+        self.about_menu.add_command(label='About', command=self.popup_message)
         self.key_entry.insert('0', '0')
 
     def Key_scale_update(self, value) -> None:
@@ -74,8 +75,7 @@ class ASCIIapp:
             case 3:
                 self.Brute_force()
             case _:
-                pass
-                # TODO: print error
+                self.popup_message('You must choose one of the modes!')
 
     def Shift(self, show=1, key=-1, clear=1) -> list[str]:
         '''
@@ -102,7 +102,6 @@ class ASCIIapp:
                     var += 126 - 31  # Length of the interval
                 while var > 126:
                     var -= 126 - 31
-                # TODO: Budeš muset vyřešit overflow :D -> DONE
                 temp.append(chr(var))
         if show == 1:
             self.Show(temp)
@@ -114,6 +113,9 @@ class ASCIIapp:
         '''
 
     def Show(self, input) -> None:
+        '''
+        Shows inputed string in the scrolledtext textbox wiidget
+        '''
         while input[-1] == '\n':  # Removes the last entry character,
             input.pop()  # without it the textbox always adds it for some reason
         content = ''.join(input)
@@ -147,15 +149,9 @@ class ASCIIapp:
                         self.muew = ''.join(self.muew)
                         self.muew = self.muew.split('\n')
                 except Exception as error:
-                    print(error)
-                    pass
-                    # TODO: Okno co vyhodí chybu s popisem
+                    self.popup_message(error)
                 file.close()
-
-        #
-        # if not cipher:
-        #     # TODO: error message
-        #     pass
+                
         for key in range(94):
             key_guess.append(0)
             cipher = self.Shift(show=0, key=key, clear=0)
@@ -176,6 +172,7 @@ class ASCIIapp:
             defaultextension=".txt",
             filetypes=[("Text files", "*.txt"), ("All files", "*.*")],
             title="Save Text File")
+        
         if not file_path:
             return
 
@@ -183,20 +180,28 @@ class ASCIIapp:
             with open(file_path, 'w') as file:
                 file.write(self.textbox.get("1.0", tk.END))
                 file.close()
-        except Exception as error:  # TODO: udělej z error self proměnnou a tu potom sharuj skrze všechny možné breakpointy a pak bždy akorát zavolej funkci která vyhodí dialog s chybou
-            pass
+        except Exception as error:
+            self.popup_message(error)    
+
+    def  popup_message(self, error = '') -> None:
+        if error == '':
+            about_text = 'Simple ASCII character based cipher app with built-in bruteforce method.\nMade by Radoslav Tomčala (246958) for PP2 class.\nIn Brno VUT FEKT 2023'
+            messagebox.showinfo(title="About", message=about_text)
+        else:
+            messagebox.showinfo(title="About", message=error)
+            
+            
+
 
     def open_file(self) -> None:
         filepath = filedialog.askopenfilename(initialdir="/", title="Select a File",
                                               filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
-
         if os.path.exists(filepath):
             try:
                 with open(filepath, 'r') as file:
                     content = file.read()
             except Exception as error:
-                print(error)
-                pass
-                # TODO: Okno co vyhodí chybu s popisem
+                self.popup_message(error)
+                return
             file.close()
             self.textbox.insert("1.0", content)
